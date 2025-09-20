@@ -1,0 +1,5 @@
+{
+  "name": "MemoryPalace Builder - 3D",
+  "description": "An application that uses generative AI to transform any anchor (object, place, or photo) into a vivid 'memory palace' to help you memorize lists of items but in 3D and lets you navigate through memory like Genie 3",
+  "requestFramePermissions": []
+}
