@@ -3,12 +3,22 @@ import * as THREE from 'three';
 
 interface ThreeDViewerProps {
   imageUrl: string;
+  zoomFov: number;
 }
 
-const ThreeDViewer: React.FC<ThreeDViewerProps> = ({ imageUrl }) => {
+const ThreeDViewer: React.FC<ThreeDViewerProps> = ({ imageUrl, zoomFov }) => {
   const mountRef = useRef<HTMLDivElement>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const isDragging = useRef(false);
   const previousMousePosition = useRef({ x: 0, y: 0 });
+
+  // Effect to update camera FOV when zoomFov prop changes
+  useEffect(() => {
+    if (cameraRef.current) {
+      cameraRef.current.fov = zoomFov;
+      cameraRef.current.updateProjectionMatrix();
+    }
+  }, [zoomFov]);
 
   useEffect(() => {
     if (!mountRef.current || !imageUrl) return;
@@ -20,9 +30,10 @@ const ThreeDViewer: React.FC<ThreeDViewerProps> = ({ imageUrl }) => {
     const scene = new THREE.Scene();
 
     // Camera
-    const camera = new THREE.PerspectiveCamera(75, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(zoomFov, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
     camera.position.z = 0.01; // Start inside the sphere
     camera.rotation.order = 'YXZ'; // Set rotation order to avoid gimbal lock and make controls more intuitive
+    cameraRef.current = camera;
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({ 
@@ -158,6 +169,7 @@ const ThreeDViewer: React.FC<ThreeDViewerProps> = ({ imageUrl }) => {
 
       renderer.dispose();
       geometry.dispose();
+      cameraRef.current = null;
       // Materials and textures are not explicitly tracked here, but Three.js will GC them
     };
   }, [imageUrl]);

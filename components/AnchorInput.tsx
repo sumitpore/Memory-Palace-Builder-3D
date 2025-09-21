@@ -17,7 +17,7 @@ interface AnchorInputProps {
   maxLength: number;
 }
 
-const defaultOptions = ['A cozy desk', 'The inside of a car', 'A trusty backpack'];
+const defaultOptions = ['A cozy desk', 'The inside of a car', 'A modern kitchen'];
 
 const famousPlaces = [
   'Utsav Chowk, Kharghar',

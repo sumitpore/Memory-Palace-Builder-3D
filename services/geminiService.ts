@@ -129,7 +129,7 @@ const generateImages = async (anchorType: AnchorType, anchorValue: AnchorValue, 
     throw new Error("Failed to generate or edit the image. The model may have returned text instead.");
   };
 
-  const imagePromises = Array(4).fill(0).map(() => generateOneImage());
+  const imagePromises = Array(2).fill(0).map(() => generateOneImage());
   return Promise.all(imagePromises);
 };
 
@@ -186,7 +186,7 @@ const editAndGenerateImages = async (baseImageUrl: string, prompt: string): Prom
         throw new Error("Failed to edit the image. The model may have returned text instead.");
     };
 
-    const imagePromises = Array(4).fill(0).map(() => editOneImage());
+    const imagePromises = Array(2).fill(0).map(() => editOneImage());
     return Promise.all(imagePromises);
 };
 

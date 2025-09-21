@@ -306,7 +306,7 @@ const MemoryPalaceDisplay: React.FC<MemoryPalaceDisplayProps> = ({
               </div>
 
               {currentImageSet.length > 1 && (
-                <div className="mt-4 grid grid-cols-4 gap-4">
+                <div className="mt-4 grid grid-cols-2 gap-4">
                   {currentImageSet.map((url, index) => (
                     <div key={`${activeGenerationIndex}-${index}`} className="relative group">
                       <button

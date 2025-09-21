@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ThreeDViewer from './ThreeDViewer';
-import { CloseIcon, ChevronLeftIcon, ChevronRightIcon } from './icons/ActionIcons';
+import { CloseIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, MinusIcon } from './icons/ActionIcons';
 
 interface FullscreenViewerProps {
   images: string[];
@@ -8,8 +8,14 @@ interface FullscreenViewerProps {
   onClose: (lastIndex: number) => void;
 }
 
+const MIN_ZOOM_FOV = 30;
+const MAX_ZOOM_FOV = 100;
+const ZOOM_STEP = 10;
+const INITIAL_FOV = 30;
+
 const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ images, initialIndex, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [zoomFov, setZoomFov] = useState(INITIAL_FOV);
 
   const handleNext = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -23,10 +29,24 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ images, initialInde
     onClose(currentIndex);
   }, [onClose, currentIndex]);
 
+  const handleZoomIn = useCallback(() => {
+    setZoomFov(prev => Math.max(MIN_ZOOM_FOV, prev - ZOOM_STEP));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoomFov(prev => Math.min(MAX_ZOOM_FOV, prev + ZOOM_STEP));
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         handleClose();
+      }
+       if (e.key === '+' || e.key === '=') {
+        handleZoomIn();
+      }
+      if (e.key === '-' || e.key === '_') {
+        handleZoomOut();
       }
       // Note: Left/Right arrows are intentionally not used for image navigation
       // to avoid conflicting with the 3D viewer's camera controls.
@@ -36,7 +56,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ images, initialInde
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleClose]);
+  }, [handleClose, handleZoomIn, handleZoomOut]);
 
   if (!images || images.length === 0) return null;
 
@@ -50,7 +70,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ images, initialInde
       <div className="relative w-full h-full flex items-center justify-center">
         {/* Main content: Viewer */}
         <div className="w-full h-full flex items-center justify-center">
-            <ThreeDViewer imageUrl={images[currentIndex]} />
+            <ThreeDViewer imageUrl={images[currentIndex]} zoomFov={zoomFov} />
         </div>
 
         {/* Close Button */}
@@ -84,6 +104,27 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ images, initialInde
             </button>
         )}
         
+        {/* Zoom Controls */}
+        <div className="absolute right-4 bottom-16 flex flex-col bg-black/40 rounded-lg shadow-lg">
+            <button
+              onClick={handleZoomIn}
+              disabled={zoomFov <= MIN_ZOOM_FOV}
+              className="p-2 text-white hover:bg-black/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white rounded-t-lg"
+              aria-label="Zoom in"
+            >
+              <PlusIcon className="w-6 h-6" />
+            </button>
+            <div className="h-px bg-white/20"></div> {/* Separator */}
+            <button
+              onClick={handleZoomOut}
+              disabled={zoomFov >= MAX_ZOOM_FOV}
+              className="p-2 text-white hover:bg-black/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white rounded-b-lg"
+              aria-label="Zoom out"
+            >
+              <MinusIcon className="w-6 h-6" />
+            </button>
+        </div>
+
         {/* Counter */}
         {images.length > 1 && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm px-3 py-1.5 rounded-full tabular-nums">
